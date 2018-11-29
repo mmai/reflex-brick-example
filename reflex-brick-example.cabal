@@ -1,0 +1,37 @@
+name:                reflex-brick-example
+version:             0.1.0.0
+-- category:
+-- synopsis:
+-- description:
+homepage:            https://github.com/mmai/reflex-brick-example
+license:             BSD3
+license-file:        LICENSE
+author:              Henri Bourcereau
+maintainer:          henri.bourcereau@gmail.com
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:  README.md
+
+executable reflex-brick-example
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  ghc-options:         -threaded
+  default-language:    Haskell2010
+  other-modules:       APIClient
+                     , Data
+                     , Template
+  build-depends:       base >= 4.7 && < 5
+                     , aeson
+                     , async
+                     , brick
+                     , bytestring
+                     , http-client
+                     , lens
+                     , lens-aeson
+                     , mtl
+                     , optparse-applicative
+                     , reflex
+                     , reflex-brick
+                     , text
+                     , vty
+                     , wreq
