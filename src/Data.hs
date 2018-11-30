@@ -12,7 +12,8 @@ import           GHC.Generics
 import           Data.ByteString.Lazy.Internal
 
 data AppState = AppState
-  { _packages  :: [Package]
+  { _search   :: String
+  , _packages :: [Package]
   }
 
 data Package = Package

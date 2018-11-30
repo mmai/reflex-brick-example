@@ -26,9 +26,9 @@ appStateToBrickAppState s = ReflexBrickAppState [window] (const Nothing) (attrMa
                                           ]
                        ]
         searchWidget       = C.hCenter . padAll 1 $ txt "Search"
+        packageWidget p    = hBox [ txt $ p ^. name ]
+        packagesListWidget = padAll 1 $ vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]
         usageWidget        = B.borderWithLabel (str "Usage") $ 
           vBox [ txt "'s' : search"
                , txt "'q' : quit"
                ]
-        packageWidget p    = hBox [ txt $ p ^. name ]
-        packagesListWidget = padAll 1 $ vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]

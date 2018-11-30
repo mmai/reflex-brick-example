@@ -19,11 +19,11 @@ import           Template (appStateToBrickAppState)
 
 main :: IO ()
 main = do
-  let initial = AppState []
+  let initial = AppState "reflex" []
   apiclient <- getClient
   runReflexBrickApp (pure ()) Nothing (appStateToBrickAppState initial :: ReflexBrickAppState ()) $ \es -> do
     let eQuit   = select es $ RBKey (V.KChar 'q')
-        eSearch = select es $ RBKey (V.KChar 's') 
+        eSearch = const "reflex" <$> (select es $ RBKey (V.KChar 's') )
 
     eSearchPackages <- mkSearchPackages apiclient eSearch
     dState <- foldDyn ($) initial . mergeWith (.) $ 
@@ -35,10 +35,20 @@ main = do
 
     pure $ ReflexBrickApp eOut never (void eQuit)
 
-mkSearchPackages :: (Reflex t, MonadIO m) => APIClient -> Event t a -> m (Event t (AppState -> AppState))
-mkSearchPackages apiclient e = do 
-  searchPackages <- liftIO $ searchPackagesIO apiclient
-  pure $ searchPackages <$ e
+mkSearchPackages :: (Reflex t, MonadHold t m, MonadIO m) => APIClient -> Event t String -> m (Event t (AppState -> AppState))
+mkSearchPackages apiclient eSearch = do 
+  -- dSearch <- holdDyn "reflex" eSearch
+  -- searchPackagesIni <- liftIO $ searchPackagesIO apiclient "reflex" 
+  -- dSearch <- foldDynM (mkSearchPackages' apiclient) searchPackagesIni eSearch
+  -- return $ updated dSearch
+  -- XXX  with performEvent ?
 
-searchPackagesIO :: APIClient -> IO (AppState -> AppState)
-searchPackagesIO api = (packages .~) <$> apiSearchPackages "reflex" api 
+  searchPackages <- liftIO $ searchPackagesIO apiclient "reflex" 
+  pure $ searchPackages <$ eSearch
+
+mkSearchPackages' :: (MonadIO m) => APIClient -> String -> (AppState -> AppState) -> m (AppState -> AppState)
+mkSearchPackages' api search _ = liftIO $ searchPackagesIO api search
+
+searchPackagesIO :: APIClient -> String -> IO (AppState -> AppState)
+searchPackagesIO api search = (packages .~) <$> apiSearchPackages search api 
+
