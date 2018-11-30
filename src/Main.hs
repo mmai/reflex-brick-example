@@ -22,14 +22,12 @@ main = do
   let initial = AppState []
   apiclient <- getClient
   runReflexBrickApp (pure ()) Nothing (appStateToBrickAppState initial :: ReflexBrickAppState ()) $ \es -> do
-    let 
-        eQuit = select es $ RBKey (V.KChar 'q')
-        ePackages = select es $ RBKey (V.KChar 's') 
+    let eQuit   = select es $ RBKey (V.KChar 'q')
+        eSearch = select es $ RBKey (V.KChar 's') 
 
-    eFetchedPackages <- mkFetchPackages apiclient ePackages
-    dState <- foldDyn ($) initial .
-              mergeWith (.) $ 
-                [ eFetchedPackages
+    eSearchPackages <- mkSearchPackages apiclient eSearch
+    dState <- foldDyn ($) initial . mergeWith (.) $ 
+                [ eSearchPackages
                 ]
 
     let eNotQuit = difference (updated dState) eQuit
@@ -37,10 +35,10 @@ main = do
 
     pure $ ReflexBrickApp eOut never (void eQuit)
 
-mkFetchPackages :: (Reflex t, MonadIO m) => APIClient -> Event t a -> m (Event t (AppState -> AppState))
-mkFetchPackages apiclient e = do 
-  fetchPackages <- liftIO $ updatePackagesIO apiclient
-  pure $ fetchPackages <$ e
+mkSearchPackages :: (Reflex t, MonadIO m) => APIClient -> Event t a -> m (Event t (AppState -> AppState))
+mkSearchPackages apiclient e = do 
+  searchPackages <- liftIO $ searchPackagesIO apiclient
+  pure $ searchPackages <$ e
 
-updatePackagesIO :: APIClient -> IO (AppState -> AppState)
-updatePackagesIO api = (packages .~) <$> apiPackages "reflex" api 
+searchPackagesIO :: APIClient -> IO (AppState -> AppState)
+searchPackagesIO api = (packages .~) <$> apiSearchPackages "reflex" api 

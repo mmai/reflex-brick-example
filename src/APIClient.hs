@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module APIClient ( APIClient(..)
-               , apiPackages
+               , apiSearchPackages
                , getClient
                ) where
 
@@ -14,7 +14,6 @@ import           Network.Wreq hiding (get)
 import qualified Network.Wreq.Session as S
 import           Control.Lens
 import           Data.Aeson
-import           Data.Aeson.Lens (_String, key)
 import           Data.Aeson.Types
 
 import           Data 
@@ -43,5 +42,5 @@ getPackages search = do
   resp <- callApiGet $ "packages/search?terms=" <> search 
   return . fromMaybe [] $ decode $ resp ^. responseBody 
 
-apiPackages :: String -> APIClient -> IO [Package]
-apiPackages search = evalStateT (getPackages search)
+apiSearchPackages :: String -> APIClient -> IO [Package]
+apiSearchPackages search = evalStateT (getPackages search)

@@ -16,11 +16,19 @@ import Data
 
 appStateToBrickAppState :: AppState -> ReflexBrickAppState n
 appStateToBrickAppState s = ReflexBrickAppState [window] (const Nothing) (attrMap V.defAttr []) 
-  where window  =  B.borderWithLabel (str "Search on Hackage (press 'q' to quit)") $ content
+  -- where window  =  B.borderWithLabel (str "Search on Hackage") $ content
+    where 
+        window  =  B.borderWithLabel (str "Search on Hackage") $ hBox [ usageWidget
+                      , content
+                      ] 
         content = vBox [ searchWidget
                        , C.hCenter $ hBox [ packagesListWidget
                                           ]
                        ]
-        searchWidget = C.hCenter . padAll 1 $ txt "Search"
+        searchWidget       = C.hCenter . padAll 1 $ txt "Search"
+        usageWidget        = B.borderWithLabel (str "Usage") $ 
+          vBox [ txt "'s' : search"
+               , txt "'q' : quit"
+               ]
+        packageWidget p    = hBox [ txt $ p ^. name ]
         packagesListWidget = padAll 1 $ vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]
-        packageWidget p = hBox [ txt $ p ^. name ]

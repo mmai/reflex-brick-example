@@ -4,7 +4,7 @@ A small console application in Haskell made with [brick](https://github.com/jtda
 
 ## Installation
 
-You need _nix_ installed on your system :
+You need _[nix_](https://nixos.org/nix/)_ installed on your system :
 
 `curl https://nixos.org/nix/install | sh`
 
@@ -15,5 +15,5 @@ cd reflex-brick-example
 nix-shell
 nix-env -i cabal-install # installs cabal if not already installed
 cabal build
-cabal run reflex-brick-example
+cabal run
 ```
