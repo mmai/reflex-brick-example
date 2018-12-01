@@ -12,20 +12,18 @@ import           GHC.Generics
 import           Data.ByteString.Lazy.Internal
 
 data AppState = AppState
-  { _search   :: String
+  { _search   :: Text
   , _packages :: [Package]
   }
 
-data Package = Package
-  { _name  :: Text
-  }
+newtype Package = Package { _name  :: Text }
 
 instance ToJSON Package where
-  toJSON p = object [ "name" .= _name p
-                    ]
+  toJSON p = object [ "name" .= _name p ]
 
 instance FromJSON Package where
   parseJSON = withObject "package" $ \o ->
     Package <$> o .: "name"
+
 makeLenses ''Package
 makeLenses ''AppState
