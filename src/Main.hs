@@ -16,13 +16,13 @@ import qualified Graphics.Vty as V
 
 import           Data
 import           APIClient
-import           Template (appStateToBrickAppState)
+import           Template (appStateToBrickAppState, Name(..))
 
 main :: IO ()
 main = do
-  let initial = AppState "reflex" []
+  let initial = AppState "ooo" []
   apiclient <- getClient
-  runReflexBrickApp (pure ()) Nothing (appStateToBrickAppState initial :: ReflexBrickAppState ()) $ \es -> do
+  runReflexBrickApp (pure ()) Nothing (appStateToBrickAppState initial :: ReflexBrickAppState Name) $ \es -> do
     let eQuit   = select es $ RBKey (V.KChar 'q')
         eSearch = const "brick" <$> select es ( RBKey (V.KChar 's') )
 
