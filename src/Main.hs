@@ -20,11 +20,19 @@ import           Template (appStateToBrickAppState, Name(..))
 
 main :: IO ()
 main = do
-  let initial = AppState "ooo" []
+  let initial = AppState "reflex" []
   apiclient <- getClient
   runReflexBrickApp (pure ()) Nothing (appStateToBrickAppState initial :: ReflexBrickAppState Name) $ \es -> do
-    let eQuit   = select es $ RBKey (V.KChar 'q')
-        eSearch = const "brick" <$> select es ( RBKey (V.KChar 's') )
+    let eQuit   = select es $ RBKey V.KEsc
+        eSearch = const "brick" <$> select es ( RBKey V.KEnter ) -- XXX use behavior to get search value ?
+        -- select all other keypresses ?
+
+                -- VtyEvent (V.EvKey V.KEnter [])
+                --     | focusGetCurrent (formFocus s) /= Just AddressField -> halt s
+                -- _ -> do
+                --     s' <- handleFormEvent ev s
+
+-- TODO : if focus on search, handle keypress events and update search field
 
     -------------- trying to construct searchPackages Event
 
@@ -38,7 +46,7 @@ main = do
     -- eSearchPackages <- performAsync eSearch (searchPackagesIO apiclient)
 
     -- search string parameter fixed : OK, but we need a real variable parameter
-    searchPackages <- liftIO $ searchPackagesIO apiclient "reflex" 
+    searchPackages <- liftIO $ searchPackagesIO apiclient "wreq" 
     let eSearchPackages = searchPackages <$ eSearch
 
     -------------- end trying to construct searchPackages Event
@@ -49,6 +57,9 @@ main = do
         eOut     = appStateToBrickAppState <$> eNotQuit
 
     pure $ ReflexBrickApp eOut never (void eQuit)
+
+-- handleForm :: Event t a -> AppState -> AppState
+-- handleForm = handleBrickEvents
 
 searchPackagesIO :: APIClient -> String -> IO (AppState -> AppState)
 searchPackagesIO api search = (packages .~) <$> apiSearchPackages search api 

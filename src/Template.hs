@@ -19,15 +19,10 @@ import Brick.Forms
   , newForm
   , formState
   , formFocus
-  , setFieldValid
   , renderForm
   , handleFormEvent
-  , invalidFields
-  , allFieldsValid
   , focusedFormInputAttr
   , invalidFormInputAttr
-  , radioField
-  , editShowableField
   , editTextField
   , (@@=)
   )
@@ -41,22 +36,29 @@ import Data
 data Name = SearchField deriving (Eq, Ord, Show)
 
 appStateToBrickAppState :: AppState -> ReflexBrickAppState Name
-appStateToBrickAppState s = ReflexBrickAppState [window] (focusRingCursor formFocus s) (attrMap V.defAttr []) 
--- appStateToBrickAppState s = ReflexBrickAppState [window] (const Nothing) (attrMap V.defAttr []) 
-  -- where window  =  B.borderWithLabel (str "Search on Hackage") $ content
+appStateToBrickAppState s = ReflexBrickAppState [window] (focusRingCursor formFocus searchForm) stylesMap 
     where 
-        window  =  B.borderWithLabel (str "Search on Hackage") $ hBox [ usageWidget
-                      , content
-                      ] 
-        content = vBox [ C.hCenter searchForm
-                       , C.hCenter $ hBox [ packagesListWidget
-                                          ]
-                       ]
+        window  =  B.borderWithLabel (str "Search on Hackage") $ 
+                      hBox [ usageWidget
+                           , C.hCenter $ padAll 1 $ vBox 
+                                  [ renderForm searchForm
+                                  , hBox [ packagesListWidget ]
+                                  ]
+                           ] 
         packageWidget p    = hBox [ txt $ p ^. name ]
-        packagesListWidget = padAll 1 $ vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]
-        searchForm = renderForm . newForm [ editTextField search SearchField (Just 1) ] $ s
+        packagesListWidget = vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]
+        searchForm = newForm [ editTextField search SearchField (Just 1) ] s
         usageWidget        = B.borderWithLabel (str "Usage") $ 
-          vBox [ txt "'s' : search"
-               , txt "'q' : quit"
+          vBox [ txt "<ENTER> : search"
+               , txt "<ESC>   : quit"
                ]
 
+-- handleBrickEvents :: Event -> AppState -> AppState
+
+stylesMap :: AttrMap
+stylesMap = attrMap V.defAttr
+  [ (WE.editAttr, V.white `on` V.black)
+  , (WE.editFocusedAttr, V.black `on` V.yellow)
+  , (invalidFormInputAttr, V.white `on` V.red)
+  , (focusedFormInputAttr, V.black `on` V.yellow)
+  ]
