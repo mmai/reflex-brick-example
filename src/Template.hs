@@ -3,6 +3,8 @@
 module Template (
     appStateToBrickAppState
   , Name (..)
+                , initialSearchEditor
+                , getSearchContents
   ) where
 
 import           Control.Lens
@@ -33,21 +35,26 @@ import Brick.Focus
 
 import Data 
 
-data Name = SearchField deriving (Eq, Ord, Show)
+getSearchContents = WE.getEditContents . _searchE
+
+initialSearchEditor :: WE.Editor Text Name
+initialSearchEditor = WE.editorText SearchField (Just 1) "??"
 
 appStateToBrickAppState :: AppState -> ReflexBrickAppState Name
-appStateToBrickAppState s = ReflexBrickAppState [window] (focusRingCursor formFocus searchForm) stylesMap 
+appStateToBrickAppState s = ReflexBrickAppState [window] (const Nothing) stylesMap 
+-- appStateToBrickAppState s = ReflexBrickAppState [window] (focusRingCursor formFocus searchForm) stylesMap 
     where 
         window  =  B.borderWithLabel (str "Search on Hackage") $ 
                       hBox [ usageWidget
                            , C.hCenter $ padAll 1 $ vBox 
-                                  [ renderForm searchForm
+                                  [ searchForm
                                   , hBox [ packagesListWidget ]
                                   ]
                            ] 
         packageWidget p    = hBox [ txt $ p ^. name ]
         packagesListWidget = vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]
-        searchForm = newForm [ editTextField search SearchField (Just 1) ] s
+        -- searchForm = renderForm  $ newForm [ editTextField search SearchField (Just 1) ] s
+        searchForm = WE.renderEditor (txt . intercalate "\n") True ( s ^. searchE )
         usageWidget        = B.borderWithLabel (str "Usage") $ 
           vBox [ txt "<ENTER> : search"
                , txt "<ESC>   : quit"

@@ -44,3 +44,10 @@ getPackages search = do
 
 apiSearchPackages :: String -> APIClient -> IO [Package]
 apiSearchPackages search = evalStateT (getPackages search)
+
+-- apiSearchPackages' :: APIClient -> IO (String -> [Package])
+-- apiSearchPackages = evalStateT $ do
+--   APIClient {..} <- get
+--   let opts = defaults & header "Accept" .~ ["application/json"]
+--   resp <- liftIO $ S.getWith opts session (server <> "packages/search?terms=" <> search) 
+--   return . fromMaybe [] $ decode $ resp ^. responseBody 

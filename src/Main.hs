@@ -16,16 +16,24 @@ import qualified Graphics.Vty as V
 
 import           Data
 import           APIClient
-import           Template (appStateToBrickAppState, Name(..))
+import           Template ( appStateToBrickAppState, Name(..), initialSearchEditor, getSearchContents)
 
 main :: IO ()
 main = do
-  let initial = AppState "reflex" []
+  let initial = AppState 
+        { _search  = "reflex" 
+        , _searchE = initialSearchEditor
+        , _packages = []
+        }
   apiclient <- getClient
   runReflexBrickApp (pure ()) Nothing (appStateToBrickAppState initial :: ReflexBrickAppState Name) $ \es -> do
     let eQuit   = select es $ RBKey V.KEsc
         eSearch = const "brick" <$> select es ( RBKey V.KEnter ) -- XXX use behavior to get search value ?
-        -- select all other keypresses ?
+        eWrite =  select es ( RBKey (V.KChar 'f') ) -- select all other keypresses ?
+
+
+-- myEventHandler :: MyState -> BrickEvent n e -> EventM Name (Next MyState)
+-- myEventHandler s (VtyEvent e) = continue =<< handleEventLensed s theEdit handleEditorEvent e
 
                 -- VtyEvent (V.EvKey V.KEnter [])
                 --     | focusGetCurrent (formFocus s) /= Just AddressField -> halt s
@@ -47,7 +55,8 @@ main = do
 
     -- search string parameter fixed : OK, but we need a real variable parameter
     searchPackages <- liftIO $ searchPackagesIO apiclient "wreq" 
-    let eSearchPackages = searchPackages <$ eSearch
+    let eSearchPackages = searchPackages  <$ eSearch
+    -- let eSearchPackages = searchPackages . getSearchContents <$ eSearch
 
     -------------- end trying to construct searchPackages Event
 
