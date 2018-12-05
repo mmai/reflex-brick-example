@@ -11,14 +11,18 @@ import           Control.Lens.TH
 import           GHC.Generics
 import           Data.ByteString.Lazy.Internal
 import qualified Brick.Widgets.Edit    as WE
+import           Brick.Forms (Form)
 
 data AppState = AppState
-  { _search   :: Text
-  , _searchE  :: WE.Editor Text Name
+  { _searchFormState  :: Form FormState BrickAppEvent Name
   , _packages :: [Package]
   }
 
+
+-- Brick types
 data Name = SearchField deriving (Eq, Ord, Show)
+data BrickAppEvent = BrickAppEvent
+data FormState = FormState { _fsf :: Text }
 
 newtype Package = Package { _name  :: Text }
 
@@ -31,3 +35,4 @@ instance FromJSON Package where
 
 makeLenses ''Package
 makeLenses ''AppState
+makeLenses ''FormState

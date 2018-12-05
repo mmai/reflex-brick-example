@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Template (
-    appStateToBrickAppState
-  , Name (..)
-                , initialSearchEditor
-                , getSearchContents
-  ) where
+module Template ( appStateToBrickAppState
+                , Name (..)
+                , initialForm
+                , handleSearchForm
+                ) where
 
 import           Control.Lens
 import           Data.Text
@@ -35,32 +34,31 @@ import Brick.Focus
 
 import Data 
 
-getSearchContents = WE.getEditContents . _searchE
+initialForm :: Form FormState e Name
+initialForm = newForm [ editTextField fsf SearchField (Just 1) ] (FormState "reflex")
 
-initialSearchEditor :: WE.Editor Text Name
-initialSearchEditor = WE.editorText SearchField (Just 1) "??"
+handleSearchForm :: BrickEvent Name BrickAppEvent -> AppState -> EventM Name AppState
+handleSearchForm e s = do
+  newState <- handleFormEvent e (s ^. searchFormState )
+  return $ s & searchFormState .~ newState
 
 appStateToBrickAppState :: AppState -> ReflexBrickAppState Name
-appStateToBrickAppState s = ReflexBrickAppState [window] (const Nothing) stylesMap 
--- appStateToBrickAppState s = ReflexBrickAppState [window] (focusRingCursor formFocus searchForm) stylesMap 
+appStateToBrickAppState s = ReflexBrickAppState [window] (focusRingCursor formFocus searchForm) stylesMap 
     where 
         window  =  B.borderWithLabel (str "Search on Hackage") $ 
                       hBox [ usageWidget
                            , C.hCenter $ padAll 1 $ vBox 
-                                  [ searchForm
+                                  [ renderForm searchForm
                                   , hBox [ packagesListWidget ]
                                   ]
                            ] 
         packageWidget p    = hBox [ txt $ p ^. name ]
         packagesListWidget = vBox [ C.hCenter $ vBox (fmap packageWidget (s ^. packages))]
-        -- searchForm = renderForm  $ newForm [ editTextField search SearchField (Just 1) ] s
-        searchForm = WE.renderEditor (txt . intercalate "\n") True ( s ^. searchE )
+        searchForm = s ^. searchFormState
         usageWidget        = B.borderWithLabel (str "Usage") $ 
           vBox [ txt "<ENTER> : search"
                , txt "<ESC>   : quit"
                ]
-
--- handleBrickEvents :: Event -> AppState -> AppState
 
 stylesMap :: AttrMap
 stylesMap = attrMap V.defAttr

@@ -1,10 +1,10 @@
 # reflex-brick-example
 
+**Work in progress**
+
 A small console application in Haskell made with [brick](https://github.com/jtdaugherty/brick) and [reflex](https://reflex-frp.org/) with the help of [reflex-brick](https://github.com/dalaing/reflex-brick).
 
-## Installation
-
-You need _[nix_](https://nixos.org/nix/)_ installed on your system :
+You need _[nix](https://nixos.org/nix/)_ installed on your system :
 
 `curl https://nixos.org/nix/install | sh`
 
